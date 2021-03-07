@@ -299,15 +299,20 @@ class MixDevice : public ChannelDevice<Hal, VirtBaseChannel<Hal, PMSw1List0>, 4,
       public:
         MeasureAlarm (MixDevice& d) : Alarm (0), dev(d), first(true) {}
         virtual ~MeasureAlarm () {}
+
+        void initINA219() {
+          Wire.begin();
+          ina219.init();
+          ina219.setBusRange(BRNG_16);
+          ina219.setADCMode(SAMPLE_MODE_64);
+          //ina219.setPGain(PG_320); //3.2A
+          ina219.setPGain(PG_160); //1.6A
+        }
+
         void trigger (AlarmClock& clock)  {
           if (first == true) {
             first = false;
-            Wire.begin();
-            ina219.init();
-            ina219.setBusRange(BRNG_16);
-            ina219.setADCMode(SAMPLE_MODE_64);
-            //ina219.setPGain(PG_320); //3.2A
-            ina219.setPGain(PG_160); //1.6A
+            initINA219();
           }
 
           set(seconds2ticks(MEASURE_INTERVAL));
@@ -382,7 +387,6 @@ void setup () {
   sdev.switchChannel().init(SWITCH_PIN, INVERT_SWITCH_PIN);
   buttonISR(cfgBtn, BUTTON_PIN);
   if( first == true ) {
-    DPRINTLN("PEER");
     sdev.switchChannel().peer(cfgBtn.peer());
   }
   sdev.initDone();
