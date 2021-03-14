@@ -5,6 +5,9 @@ Homebrew Homematic USB Strom-/Spannungsmesser mit INA219
 - CCU Unterstützung bereitgestellt (Addon V 4.2)
 - Sketch lauffähig
 
+### schematischer Schaltungsaufbau
+![wiring](Images/wiring.png)
+
 ###  🚧 PCB - WORK IN PROGRESS
 
 
