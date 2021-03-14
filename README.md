@@ -13,4 +13,4 @@ Benötigt [JP-HB-Devices Addon mind. V 4.2](https://github.com/jp112sdl/JP-HB-De
 ###  🚧 PCB - WORK IN PROGRESS
 
 
-Projekt-Thread im HomeMatic-Forum: 
+Projekt-Thread im HomeMatic-Forum: https://homematic-forum.de/forum/viewtopic.php?f=76&t=66307
