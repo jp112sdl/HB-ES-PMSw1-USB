@@ -134,7 +134,7 @@ class PowerMeterChannel : public Channel<Hal, MeasureList1, EmptyList, List4, PE
       if ((txThresholdCurrent   > 0) && (abs((int)(actualValues.Current   - lastValues.Current)  ) >= (int)txThresholdCurrent))   msgType = AS_MESSAGE_POWER_EVENT;
       if ((txThresholdVoltage   > 0) && (abs((int)(actualValues.Voltage   - lastValues.Voltage)  ) >= (int)txThresholdVoltage))   msgType = AS_MESSAGE_POWER_EVENT;
 
-      if ((msgType != AS_MESSAGE_POWER_EVENT) && (actualValues.Voltage > 0) && (lastValues.Voltage == 0)) msgType = AS_MESSAGE_POWER_EVENT;
+      if ((msgType != AS_MESSAGE_POWER_EVENT) && (actualValues.Current > 0) && (lastValues.Current == 0)) msgType = AS_MESSAGE_POWER_EVENT;
       msg.init(device().nextcount(), msgType, actualValues.Current, actualValues.Voltage);
       switch (msgType) {
         case AS_MESSAGE_POWER_EVENT_CYCLIC:
@@ -206,6 +206,7 @@ class SensorChannel : public Channel<Hal, SensorList1, EmptyList, List4, PEERS_P
             if (this->getList1().condTxRising() == true)  {
               if (actualValues.Current > this->getList1().condTxThresholdHi()) {
                 if ((aboveMsgSent == false && this->getList1().condTxCyclicAbove() == false) || this->getList1().condTxCyclicAbove() == true) {
+                  //DPRINT(F("SensorChannel Strom - SENDING condTxRising "));DDECLN(this->getList1().condTxDecisionAbove());
                   rmsg.init(device().nextcount(), number(), evcnt++, this->getList1().condTxDecisionAbove(), false , false);
                   sendMsg = true;
                   aboveMsgSent = true;
@@ -217,6 +218,7 @@ class SensorChannel : public Channel<Hal, SensorList1, EmptyList, List4, PEERS_P
             if (this->getList1().condTxFalling() == true) {
               if (actualValues.Current < this->getList1().condTxThresholdLo()) {
                 if ((belowMsgSent == false && this->getList1().condTxCyclicBelow() == false) || this->getList1().condTxCyclicBelow() == true) {
+                  //DPRINT(F("SensorChannel Strom - SENDING condTxFalling "));DDECLN(this->getList1().condTxDecisionBelow());
                   rmsg.init(device().nextcount(), number(), evcnt++, this->getList1().condTxDecisionBelow(), false , false);
                   sendMsg = true;
                   belowMsgSent = true;
@@ -231,6 +233,7 @@ class SensorChannel : public Channel<Hal, SensorList1, EmptyList, List4, PEERS_P
             if (this->getList1().condTxRising() == true)  {
               if (actualValues.Voltage > this->getList1().condTxThresholdHi()) {
                 if ((aboveMsgSent == false && this->getList1().condTxCyclicAbove() == false) || this->getList1().condTxCyclicAbove() == true) {
+                  //DPRINT(F("SensorChannel Spannung - SENDING condTxRising "));DDECLN(this->getList1().condTxDecisionAbove());
                   rmsg.init(device().nextcount(), number(), evcnt++, this->getList1().condTxDecisionAbove(), false , false);
                   sendMsg = true;
                   aboveMsgSent = true;
@@ -242,6 +245,7 @@ class SensorChannel : public Channel<Hal, SensorList1, EmptyList, List4, PEERS_P
             if (this->getList1().condTxFalling() == true) {
               if (actualValues.Voltage < this->getList1().condTxThresholdLo()) {
                 if ((belowMsgSent == false && this->getList1().condTxCyclicBelow() == false) || this->getList1().condTxCyclicBelow() == true) {
+                  //DPRINT(F("SensorChannel Spannung - SENDING condTxFalling "));DDECLN(this->getList1().condTxDecisionBelow());
                   rmsg.init(device().nextcount(), number(), evcnt++, this->getList1().condTxDecisionBelow(), false , false);
                   sendMsg = true;
                   belowMsgSent = true;
@@ -255,6 +259,7 @@ class SensorChannel : public Channel<Hal, SensorList1, EmptyList, List4, PEERS_P
 
         if (sendMsg) {
           device().sendPeerEvent(rmsg, *this);
+          //DPRINTLN(F("SensorChannel - SENDING done"));
           sendMsg = false;
         }
       }
@@ -381,14 +386,27 @@ class MixDevice : public ChannelDevice<Hal, VirtBaseChannel<Hal, PMSw1List0>, 4,
 MixDevice sdev(devinfo, 0x20);
 ConfigToggleButton<MixDevice> cfgBtn(sdev);
 
+void initPeerings (bool first) {
+  // create internal peerings - CCU2 needs this
+  if ( first == true ) {
+
+    HMID devid;
+    sdev.getDeviceID(devid);
+
+    Peer current_channel_peer(devid, 3);
+    sdev.switchChannel().peer(cfgBtn.peer(), current_channel_peer);
+
+    Peer switch_peer(devid,1);
+    sdev.sensorChannel3Current().peer(switch_peer);
+  }
+}
+
 void setup () {
   DINIT(57600, ASKSIN_PLUS_PLUS_IDENTIFIER);
   bool first = sdev.init(hal);
   sdev.switchChannel().init(SWITCH_PIN, INVERT_SWITCH_PIN);
   buttonISR(cfgBtn, BUTTON_PIN);
-  if( first == true ) {
-    sdev.switchChannel().peer(cfgBtn.peer());
-  }
+  initPeerings(first);
   sdev.initDone();
 }
 
