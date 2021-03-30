@@ -24,7 +24,10 @@
 #define INVERT_SWITCH_PIN   true //true = ACTIVE LOW
 #define BUTTON_PIN          8
 #define LED_PIN             4
-#define ANALOG_VOLTAGE_PIN A2
+#define NTC                A2
+
+#define USB_OE             A1
+#define USB_S              A0
 
 // number of available peers per channel
 #define PEERS_PER_SWCHANNEL     8
@@ -70,8 +73,63 @@ class PMSw1List0 : public RegList0<Reg0> {
 bool outputOn() {
   return (digitalRead(SWITCH_PIN) == (INVERT_SWITCH_PIN == true ? LOW:HIGH));
 }
-typedef SwitchChannel<Hal, PEERS_PER_SWCHANNEL, PMSw1List0> SwChannel;
 
+class TS3USB221 {
+public:
+  void init() {
+    pinMode(USB_OE, OUTPUT);
+    pinMode(USB_S,  OUTPUT);
+
+    //set initial state
+    digitalWrite(USB_OE, HIGH);
+    digitalWrite(USB_S,  LOW);
+  }
+
+  void enable() {
+    digitalWrite(USB_OE, LOW);
+  }
+
+  void disable() {
+    digitalWrite(USB_OE, HIGH);
+  }
+
+  void enableD1() {
+    enable();
+    digitalWrite(USB_S, LOW);
+  }
+
+  void enableD2() {
+    enable();
+    digitalWrite(USB_S, HIGH);
+  }
+};
+
+class SwChannel : public SwitchChannel<Hal, PEERS_PER_SWCHANNEL, PMSw1List0>  {
+  protected:
+    typedef SwitchChannel<Hal, PEERS_PER_SWCHANNEL, PMSw1List0> BaseChannel;
+    TS3USB221 ts3usb221;
+
+  public:
+    SwChannel () : BaseChannel() {}
+    virtual ~SwChannel() {}
+
+
+    void init (uint8_t p, bool inv) {
+      ts3usb221.init();
+      BaseChannel::init(p, inv);
+    }
+
+    virtual void switchState(__attribute__((unused)) uint8_t oldstate, uint8_t newstate,uint32_t delay) {
+      BaseChannel::switchState(oldstate, newstate, delay);
+      if ( newstate == AS_CM_JT_ON ) {
+        resetAverageCounting = true;
+        ts3usb221.enableD1();
+      }
+      else if ( newstate == AS_CM_JT_OFF ) {
+        ts3usb221.disable();
+      }
+    }
+};
 DEFREGISTER(MReg1, CREG_AES_ACTIVE, CREG_AVERAGING, CREG_TX_MINDELAY, CREG_TX_THRESHOLD_CURRENT, CREG_TX_THRESHOLD_VOLTAGE )
 class MeasureList1 : public RegList1<MReg1> {
   public:

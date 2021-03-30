@@ -1,0 +1,28 @@
+EESchema-LIBRARY Version 2.3
+#encoding utf-8
+#(c) SnapEDA 2016 (snapeda.com)
+#This work is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License (CC BY-SA) with Design Exception 1.0
+#
+# TS3USB221RSERG4
+#
+DEF TS3USB221RSERG4 U 0 40 Y Y 1 L N
+F0 "U" -500 939 50 H V L BNN
+F1 "TS3USB221RSERG4" -500 -1057 50 H V L BNN
+F2 "IC_TPD6E001RSER" 0 0 50 H I L BNN
+F3 "" 0 0 50 H I L BNN
+DRAW
+S -500 -900 500 900 0 0 16 f
+X 1D+ 1 -700 600 200 R 40 40 0 0 B 
+X 1D- 2 -700 500 200 R 40 40 0 0 B 
+X 2D+ 3 -700 300 200 R 40 40 0 0 B 
+X 2D- 4 -700 200 200 R 40 40 0 0 B 
+X D+ 8 -700 0 200 R 40 40 0 0 B 
+X D_ 7 -700 -200 200 R 40 40 0 0 B 
+X OE 6 -700 -400 200 R 40 40 0 0 B 
+X S 9 -700 -600 200 R 40 40 0 0 B 
+X VCC 10 700 800 200 L 40 40 0 0 W 
+X GND 5 700 -800 200 L 40 40 0 0 W 
+ENDDRAW
+ENDDEF
+#
+# End Library

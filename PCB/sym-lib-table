@@ -1,0 +1,6 @@
+(sym_lib_table
+  (lib (name cc1101)(type Legacy)(uri ${KIPRJMOD}/additional/cc1101.lib)(options "")(descr ""))
+  (lib (name HB-ES-PMSw1-USB-rescue)(type Legacy)(uri ${KIPRJMOD}/HB-ES-PMSw1-USB-rescue.lib)(options "")(descr ""))
+  (lib (name TS3USB221RSERG4)(type Legacy)(uri ${KIPRJMOD}/additional/TS3USB221RSERG4.lib)(options "")(descr ""))
+  (lib (name SI9933CDY)(type Legacy)(uri ${KIPRJMOD}/additional/SI9933CDY.lib)(options "")(descr ""))
+)
